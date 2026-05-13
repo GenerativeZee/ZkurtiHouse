@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Luxurious, premium ethnic wear for women. Stylish kurtis at affordable prices.",
 };
 
-import CustomCursor from "@/components/ui/CustomCursor";
+import ClientWrapper from "@/components/layout/ClientWrapper";
 
 export default function RootLayout({
   children,
@@ -29,8 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="min-h-screen flex flex-col bg-brand-ivory text-brand-charcoal overflow-x-hidden">
-        <CustomCursor />
-        <div className="grain-overlay" />
+        <ClientWrapper />
         <Header />
         <main className="flex-grow pt-20">
           {children}

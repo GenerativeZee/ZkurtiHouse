@@ -18,6 +18,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="group relative"
+      data-cursor="product"
     >
       <Link href={`/product/${product.id}`} className="block">
         <Tilt>

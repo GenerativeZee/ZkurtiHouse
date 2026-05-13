@@ -10,6 +10,9 @@ import Marquee from "@/components/ui/Marquee";
 import Tilt from "@/components/ui/Tilt";
 import { useRef } from "react";
 
+import dynamic from "next/dynamic";
+const StickyNav = dynamic(() => import("@/components/ui/StickyNav"), { ssr: false });
+
 export default function Home() {
   const bestsellers = products.filter((p) => p.isBestseller).slice(0, 4);
   const heroRef = useRef(null);
@@ -22,7 +25,8 @@ export default function Home() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
-    <div className="flex flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden" id="top">
+      <StickyNav />
       {/* Hero Section */}
       <section ref={heroRef} className="relative h-[110vh] min-h-[800px] flex items-center justify-center overflow-hidden" style={{ perspective: "1000px" }}>
         <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 scale-110">
@@ -151,6 +155,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Lookbook Section */}
+      <section id="lookbook" className="py-40 bg-brand-charcoal text-white overflow-hidden">
+        <div className="container-custom">
+          <div className="flex flex-col md:flex-row items-center gap-20">
+            <div className="w-full md:w-1/2 space-y-12">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="space-y-6"
+              >
+                <p className="text-[10px] uppercase tracking-[0.5em] text-brand-gold font-bold">The Lookbook</p>
+                <h2 className="text-6xl md:text-8xl font-serif leading-none">Timeless <br /> Elegance</h2>
+                <p className="text-sm text-white/50 leading-loose max-w-md">
+                  Captured in the heart of Aligarh, our latest collection explores the intersection of heritage craftsmanship and modern silhouettes.
+                </p>
+              </motion.div>
+              
+              <div className="flex gap-4">
+                <Link href="/shop" className="px-10 py-4 border border-white/20 text-[10px] uppercase tracking-widest font-bold hover:bg-white hover:text-brand-charcoal transition-all">
+                  View Collection
+                </Link>
+              </div>
+            </div>
+            
+            <div className="w-full md:w-1/2 relative h-[600px]">
+              <motion.div
+                initial={{ scale: 1.2, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.5 }}
+                className="absolute inset-0 z-0"
+              >
+                <Image
+                  src="/images/about-brand.png"
+                  alt="Lookbook"
+                  fill
+                  className="object-cover opacity-60"
+                />
+              </motion.div>
+              
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-1/2 h-[120%] border border-white/10 absolute -rotate-6" />
+                <div className="w-1/2 h-[120%] border border-brand-gold/20 absolute rotate-12" />
+              </div>
+              
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute -bottom-10 -right-10 w-40 h-40 flex items-center justify-center border border-white/10 rounded-full"
+              >
+                <span className="text-[8px] uppercase tracking-[0.3em] font-bold">Label Noor • Aligarh • </span>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why Choose Us */}
       <section className="py-32 bg-brand-beige/30">
         <div className="container-custom">
@@ -196,7 +258,7 @@ export default function Home() {
       </section>
 
       {/* Bestsellers Section */}
-      <section className="py-32 bg-white">
+      <section id="bestsellers" className="py-32 bg-white">
         <div className="container-custom">
           <div className="text-center mb-24 space-y-4">
             <p className="text-[10px] uppercase tracking-[0.5em] text-brand-gold font-bold">Trending</p>

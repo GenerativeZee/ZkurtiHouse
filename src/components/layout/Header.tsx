@@ -34,90 +34,72 @@ const Header = () => {
       )}
     >
       <div className="container-custom flex items-center justify-between">
-        {/* Left Navigation */}
-        <nav className="hidden md:flex items-center space-x-8 flex-1">
-          {navLinks.slice(0, 3).map((link) => (
+        {/* Left: Brand Identity */}
+        <div className="flex-1">
+          <Link href="/" className="group inline-block">
+            <span className="text-2xl font-serif tracking-tight text-brand-charcoal">
+              Label <span className="text-brand-gold italic">Noor</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Center: Main Menu */}
+        <nav className="hidden lg:flex items-center space-x-8">
+          {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className="text-[10px] uppercase tracking-[0.2em] font-bold hover:text-brand-gold transition-colors"
+              className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand-charcoal/80 hover:text-brand-gold transition-colors"
             >
               {link.name}
             </Link>
           ))}
         </nav>
 
-        {/* Centered Logo */}
-        <Link href="/" className="group flex flex-col items-center flex-1">
-          <span className="text-3xl font-serif tracking-tighter text-brand-charcoal group-hover:tracking-[0.1em] transition-all duration-700">
-            Label Noor
-          </span>
-          <span className="text-[8px] uppercase tracking-[0.5em] text-brand-gold font-bold opacity-0 group-hover:opacity-100 transition-all duration-700 -mt-1">
-            Aligarh
-          </span>
-        </Link>
-
-        {/* Right Navigation / Icons */}
-        <div className="flex items-center justify-end space-x-8 flex-1">
-          <nav className="hidden lg:flex items-center space-x-8 mr-8">
-            {navLinks.slice(3).map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-[10px] uppercase tracking-[0.2em] font-bold hover:text-brand-gold transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+        {/* Right: Actions */}
+        <div className="flex-1 flex items-center justify-end space-x-6">
+          <button className="text-brand-charcoal/80 hover:text-brand-gold transition-colors" aria-label="Search">
+            <Search size={18} strokeWidth={1.5} />
+          </button>
+          <button className="text-brand-charcoal/80 hover:text-brand-gold transition-colors" aria-label="Wishlist">
+            <Heart size={18} strokeWidth={1.5} />
+          </button>
+          <Link href="/cart" className="text-brand-charcoal/80 hover:text-brand-gold transition-colors relative" aria-label="Cart">
+            <ShoppingBag size={18} strokeWidth={1.5} />
+            <span className="absolute -top-2 -right-2 bg-brand-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+              0
+            </span>
+          </Link>
           
-          <div className="flex items-center space-x-6">
-            <button className="hover:text-brand-gold transition-colors" aria-label="Search">
-              <Search size={18} strokeWidth={1.5} />
-            </button>
-            <Link href="/cart" className="hover:text-brand-gold transition-colors relative" aria-label="Cart">
-              <ShoppingBag size={18} strokeWidth={1.5} />
-              <span className="absolute -top-2 -right-2 bg-brand-gold text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
-                0
-              </span>
-            </Link>
-            <button
-              className="md:hidden hover:text-brand-gold transition-colors"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle Menu"
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
+          <button
+            className="lg:hidden text-brand-charcoal"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0, rotateX: -20, transformOrigin: "top" }}
-            animate={{ opacity: 1, height: "auto", rotateX: 0 }}
-            exit={{ opacity: 0, height: 0, rotateX: -20 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden bg-brand-ivory border-t border-brand-charcoal/5 overflow-hidden"
-            style={{ perspective: "1000px" }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-brand-ivory border-t border-brand-charcoal/5 overflow-hidden"
           >
-            <div className="container-custom py-12 flex flex-col space-y-8" style={{ transformStyle: "preserve-3d" }}>
-              {navLinks.map((link, idx) => (
-                <motion.div
+            <div className="container-custom py-8 flex flex-col space-y-6">
+              {navLinks.map((link) => (
+                <Link
                   key={link.name}
-                  initial={{ opacity: 0, x: -20, translateZ: -50 }}
-                  animate={{ opacity: 1, x: 0, translateZ: 0 }}
-                  transition={{ delay: idx * 0.1 }}
+                  href={link.href}
+                  className="text-xl font-serif text-brand-charcoal hover:text-brand-gold transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Link
-                    href={link.href}
-                    className="text-2xl font-serif tracking-wide hover:text-brand-gold transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                </motion.div>
+                  {link.name}
+                </Link>
               ))}
             </div>
           </motion.div>

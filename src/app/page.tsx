@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowRight, Star, ShieldCheck, RefreshCw, Truck } from "lucide-react";
 import { products, categories, testimonials } from "@/lib/data";
 import ProductCard from "@/components/ui/ProductCard";
 import Marquee from "@/components/ui/Marquee";
 import Tilt from "@/components/ui/Tilt";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import dynamic from "next/dynamic";
 const StickyNav = dynamic(() => import("@/components/ui/StickyNav"), { ssr: false });
@@ -24,65 +24,99 @@ export default function Home() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const heroImages = [
+    "/images/product-1.png",
+    "/images/product-5.png",
+    "/images/hero-banner.png",
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="flex flex-col overflow-hidden" id="top">
       <StickyNav />
       {/* Hero Section */}
-      <section ref={heroRef} className="relative h-[110vh] min-h-[800px] flex items-center justify-center overflow-hidden" style={{ perspective: "1000px" }}>
-        <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 scale-110">
-          <Image
-            src="/images/hero-banner.png"
-            alt="Label Noor Hero"
-            fill
-            priority
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-black/15" />
-        </motion.div>
-
-        {/* Floating 3D Elements */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <motion.div
-            animate={{ 
-              y: [0, -20, 0],
-              rotate: [0, 10, 0]
-            }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[20%] left-[10%] w-32 h-32 rounded-full bg-brand-gold/10 blur-3xl"
-          />
-          <motion.div
-            animate={{ 
-              y: [0, 30, 0],
-              rotate: [0, -15, 0]
-            }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[20%] right-[10%] w-48 h-48 rounded-full bg-brand-pink/10 blur-3xl"
-          />
-        </div>
-
-        <div className="container-custom relative z-10 text-center text-white mt-[-10vh]" style={{ transformStyle: "preserve-3d" }}>
-          <motion.div
-            initial={{ opacity: 0, letterSpacing: "1em", rotateX: 20 }}
-            animate={{ opacity: 1, letterSpacing: "0.4em", rotateX: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            style={{ transform: "translateZ(100px)" }}
-            className="space-y-8"
+      <section ref={heroRef} className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden bg-brand-ivory">
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={currentImageIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="absolute inset-0 z-0 will-change-opacity"
           >
-            <p className="text-[12px] uppercase font-medium opacity-90 tracking-[0.5em]">
+            <motion.div
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 5, ease: "linear" }}
+              className="absolute inset-0 will-change-transform"
+            >
+              <Image
+                src={heroImages[currentImageIndex]}
+                alt="Label Noor Hero"
+                fill
+                priority
+                className="object-cover"
+              />
+            </motion.div>
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-brand-ivory/20" />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Textured Grain Overlay */}
+        <div className="absolute inset-0 z-[1] opacity-[0.02] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+
+        {/* Content */}
+        <div className="relative z-10 text-center text-white px-4 max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          >
+            <span className="text-[10px] md:text-[12px] uppercase tracking-[0.6em] mb-6 block font-bold text-white/90">
               The Aligarh Heritage Collection
-            </p>
-            <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-serif leading-none drop-shadow-2xl">
-              Minimalist <br className="hidden md:block" /> Grace
+            </span>
+            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-serif mb-10 leading-[0.9] tracking-tighter overflow-hidden">
+              <motion.span
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                className="block"
+              >
+                Minimalist
+              </motion.span>
+              <motion.span
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+                className="block italic text-brand-gold -mt-2"
+              >
+                Grace
+              </motion.span>
             </h1>
-            <div className="pt-12">
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="flex flex-col items-center"
+            >
               <Link
                 href="/shop"
-                className="bg-white text-brand-charcoal px-16 py-6 uppercase tracking-[0.4em] text-[10px] font-bold hover:bg-brand-gold hover:text-white transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.3)] inline-block"
-                style={{ transform: "translateZ(50px)" }}
+                className="group relative px-10 py-4 bg-white text-brand-charcoal text-[10px] uppercase tracking-[0.3em] font-bold overflow-hidden transition-all duration-300 hover:text-white"
               >
-                Enter the Boutique
+                <span className="relative z-10">Enter the Boutique</span>
+                <div className="absolute inset-0 bg-brand-charcoal -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out" />
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
 

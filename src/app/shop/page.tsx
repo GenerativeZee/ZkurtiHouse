@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { products } from "@/lib/data";
 import ProductCard from "@/components/ui/ProductCard";
@@ -8,7 +8,7 @@ import { SlidersHorizontal, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const ShopPage = () => {
+const ShopContent = () => {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
 
@@ -194,6 +194,14 @@ const ShopPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const ShopPage = () => {
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center font-serif">Loading Boutique...</div>}>
+      <ShopContent />
+    </Suspense>
   );
 };
 

@@ -7,6 +7,7 @@ import { ArrowRight, Star, ShieldCheck, RefreshCw, Truck } from "lucide-react";
 import { products, categories, testimonials } from "@/lib/data";
 import ProductCard from "@/components/ui/ProductCard";
 import Marquee from "@/components/ui/Marquee";
+import Tilt from "@/components/ui/Tilt";
 import { useRef } from "react";
 
 export default function Home() {
@@ -21,9 +22,9 @@ export default function Home() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col overflow-hidden">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative h-[110vh] min-h-[700px] flex items-center justify-center overflow-hidden">
+      <section ref={heroRef} className="relative h-[110vh] min-h-[800px] flex items-center justify-center overflow-hidden" style={{ perspective: "1000px" }}>
         <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 scale-110">
           <Image
             src="/images/hero-banner.png"
@@ -32,26 +33,48 @@ export default function Home() {
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute inset-0 bg-black/15" />
         </motion.div>
 
-        <div className="container-custom relative z-10 text-center text-white mt-[-10vh]">
+        {/* Floating 3D Elements */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <motion.div
-            initial={{ opacity: 0, letterSpacing: "1em" }}
-            animate={{ opacity: 1, letterSpacing: "0.4em" }}
+            animate={{ 
+              y: [0, -20, 0],
+              rotate: [0, 10, 0]
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[20%] left-[10%] w-32 h-32 rounded-full bg-brand-gold/10 blur-3xl"
+          />
+          <motion.div
+            animate={{ 
+              y: [0, 30, 0],
+              rotate: [0, -15, 0]
+            }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-[20%] right-[10%] w-48 h-48 rounded-full bg-brand-pink/10 blur-3xl"
+          />
+        </div>
+
+        <div className="container-custom relative z-10 text-center text-white mt-[-10vh]" style={{ transformStyle: "preserve-3d" }}>
+          <motion.div
+            initial={{ opacity: 0, letterSpacing: "1em", rotateX: 20 }}
+            animate={{ opacity: 1, letterSpacing: "0.4em", rotateX: 0 }}
             transition={{ duration: 1.5, ease: "easeOut" }}
+            style={{ transform: "translateZ(100px)" }}
             className="space-y-8"
           >
-            <p className="text-[12px] uppercase font-medium opacity-90">
+            <p className="text-[12px] uppercase font-medium opacity-90 tracking-[0.5em]">
               The Aligarh Heritage Collection
             </p>
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif leading-tight">
+            <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-serif leading-none drop-shadow-2xl">
               Minimalist <br className="hidden md:block" /> Grace
             </h1>
             <div className="pt-12">
               <Link
                 href="/shop"
-                className="bg-white text-brand-charcoal px-12 py-5 uppercase tracking-[0.3em] text-[10px] font-bold hover:bg-brand-gold hover:text-white transition-all duration-500 shadow-2xl"
+                className="bg-white text-brand-charcoal px-16 py-6 uppercase tracking-[0.4em] text-[10px] font-bold hover:bg-brand-gold hover:text-white transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.3)] inline-block"
+                style={{ transform: "translateZ(50px)" }}
               >
                 Enter the Boutique
               </Link>
@@ -98,28 +121,31 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {categories.map((cat, idx) => (
-              <motion.div
-                key={cat.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="group relative aspect-[3/4] overflow-hidden rounded-custom cursor-pointer"
-              >
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center">
-                  <h3 className="text-2xl font-serif mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{cat.name}</h3>
-                  <Link href={cat.link} className="text-[8px] uppercase tracking-[0.3em] font-bold border-b border-white/40 pb-1 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
-                    Discover
-                  </Link>
-                </div>
-              </motion.div>
+              <Tilt key={cat.name} className="h-full">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="group relative aspect-[3/4] overflow-hidden rounded-custom cursor-pointer shadow-xl"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                    style={{ transform: "translateZ(20px)" }}
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center" style={{ transform: "translateZ(50px)" }}>
+                    <h3 className="text-2xl font-serif mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{cat.name}</h3>
+                    <Link href={cat.link} className="text-[8px] uppercase tracking-[0.3em] font-bold border-b border-white/40 pb-1 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+                      Discover
+                    </Link>
+                  </div>
+                </motion.div>
+              </Tilt>
             ))}
           </div>
         </div>

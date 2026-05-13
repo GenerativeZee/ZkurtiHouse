@@ -92,30 +92,33 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, height: 0, rotateX: -20, transformOrigin: "top" }}
+            animate={{ opacity: 1, height: "auto", rotateX: 0 }}
+            exit={{ opacity: 0, height: 0, rotateX: -20 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="md:hidden bg-brand-ivory border-t border-brand-charcoal/5 overflow-hidden"
+            style={{ perspective: "1000px" }}
           >
-            <div className="container-custom py-8 flex flex-col space-y-6">
-              {navLinks.map((link) => (
-                <Link
+            <div className="container-custom py-12 flex flex-col space-y-8" style={{ transformStyle: "preserve-3d" }}>
+              {navLinks.map((link, idx) => (
+                <motion.div
                   key={link.name}
-                  href={link.href}
-                  className="text-lg font-serif tracking-wide hover:text-brand-gold transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  initial={{ opacity: 0, x: -20, translateZ: -50 }}
+                  animate={{ opacity: 1, x: 0, translateZ: 0 }}
+                  transition={{ delay: idx * 0.1 }}
                 >
-                  {link.name}
-                </Link>
+                  <Link
+                    href={link.href}
+                    className="text-2xl font-serif tracking-wide hover:text-brand-gold transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                </motion.div>
               ))}
-              <div className="flex space-x-6 pt-4">
-                <Heart size={20} strokeWidth={1.5} />
-                <span className="text-sm font-medium">Wishlist</span>
-              </div>
             </div>
           </motion.div>
         )}

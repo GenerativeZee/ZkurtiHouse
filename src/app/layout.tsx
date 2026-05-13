@@ -16,7 +16,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "Label Noor | Grace in Every Thread",
-  description: "Luxurious, premium ethnic wear for women. Stylish kurtis at affordable prices.",
+  description: "Label Noor: An immersive editorial ethnic wear experience. Handcrafted Aligarh kurtis with minimalist grace.",
 };
 
 import ClientWrapper from "@/components/layout/ClientWrapper";

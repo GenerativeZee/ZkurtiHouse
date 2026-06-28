@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { products } from "@/lib/data";
+import { Product } from "@/lib/data";
 import { Star, Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "@/components/ui/ProductCard";
@@ -23,7 +23,10 @@ const SIZE_CHART = [
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const product = products.find((p) => p.id === id);
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -36,21 +39,40 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const { addToCart } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
 
+  useEffect(() => {
+    setLoading(true);
+    setSelectedSize("");
+    setSelectedColor("");
+    setActiveImage(0);
+
+    Promise.all([
+      fetch(`/api/products/${id}`).then(r => r.ok ? r.json() : null),
+      fetch("/api/products").then(r => r.json()),
+    ]).then(([p, all]) => {
+      setProduct(p);
+      if (p && Array.isArray(all)) {
+        setRelatedProducts(
+          all.filter((x: Product) => x.id !== p.id && x.category === p.category).slice(0, 4)
+        );
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container-custom py-24 text-center">
+        <p className="text-sm text-brand-charcoal/40 uppercase tracking-widest animate-pulse">Loading...</p>
+      </div>
+    );
+  }
+
   if (!product) {
     return <div className="container-custom py-24 text-center">Product not found.</div>;
   }
 
-  // Use same-category product images as gallery alternates
-  const galleryImages = [
-    product.image,
-    ...products
-      .filter(p => p.id !== product.id && p.category === product.category)
-      .slice(0, 3)
-      .map(p => p.image),
-  ];
-
+  const galleryImages = [product.image, ...relatedProducts.slice(0, 3).map(p => p.image)];
   const defaultColor = selectedColor || product.colors[0];
-  const recommendations = products.filter(p => p.id !== product.id && p.category === product.category).slice(0, 4);
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -287,14 +309,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         </div>
 
         {/* Recommendations */}
-        {recommendations.length > 0 && (
+        {relatedProducts.length > 0 && (
           <div className="mt-32 space-y-12">
             <div className="text-center space-y-2">
               <h2 className="text-3xl font-serif">You May Also Like</h2>
               <div className="w-12 h-[2px] bg-brand-gold mx-auto" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {recommendations.map((p) => (
+              {relatedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>

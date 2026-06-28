@@ -7,17 +7,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { products } from "@/lib/data";
+import { Product } from "@/lib/data";
+import { useUser, UserButton, SignInButton } from "@clerk/nextjs";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { totalItems } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -30,6 +33,7 @@ const Header = () => {
       setTimeout(() => searchInputRef.current?.focus(), 100);
     } else {
       setSearchQuery("");
+      setSearchResults([]);
     }
   }, [isSearchOpen]);
 
@@ -41,13 +45,16 @@ const Header = () => {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
-  const searchResults = searchQuery.trim().length > 1
-    ? products.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.fabric.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 5)
-    : [];
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) { setSearchResults([]); return; }
+    const t = setTimeout(() => {
+      fetch(`/api/products?search=${encodeURIComponent(searchQuery)}&limit=5`)
+        .then(r => r.json())
+        .then(data => { if (Array.isArray(data)) setSearchResults(data); })
+        .catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -112,6 +119,16 @@ const Header = () => {
                 </span>
               )}
             </Link>
+
+            {isSignedIn ? (
+              <UserButton />
+            ) : (
+              <SignInButton mode="modal">
+                <button className="text-[10px] uppercase tracking-widest font-bold text-brand-charcoal/60 hover:text-brand-gold transition-colors hidden lg:block">
+                  Sign In
+                </button>
+              </SignInButton>
+            )}
 
             <button
               className="lg:hidden text-brand-charcoal"

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { products } from "@/lib/data";
+import { Product } from "@/lib/data";
 import ProductCard from "@/components/ui/ProductCard";
 import { SlidersHorizontal, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +14,8 @@ const ShopContent = () => {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
   const [sortBy, setSortBy] = useState("featured");
   const [showFilters, setShowFilters] = useState(false);
@@ -21,6 +23,13 @@ const ShopContent = () => {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
   const categories = ["Daily Wear", "Office Wear", "Festive Wear"];
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then(r => r.json())
+      .then(data => { setProducts(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   const toggleSize = (size: string) => {
     setSelectedSizes(prev =>
@@ -46,7 +55,7 @@ const ShopContent = () => {
     if (sortBy === "newest") result.sort((a, b) => b.id.localeCompare(a.id));
 
     return result;
-  }, [selectedCategory, priceRange, selectedSizes, sortBy]);
+  }, [products, selectedCategory, priceRange, selectedSizes, sortBy]);
 
   const hasActiveFilters = selectedCategory || priceRange < 1500 || selectedSizes.length > 0;
 
@@ -77,7 +86,7 @@ const ShopContent = () => {
               <span>{showFilters ? "Hide Filters" : "Show Filters"}</span>
             </button>
             <p className="text-xs text-brand-charcoal/40 uppercase tracking-widest">
-              Showing {filteredProducts.length} Product{filteredProducts.length !== 1 ? "s" : ""}
+              {loading ? "Loading..." : `Showing ${filteredProducts.length} Product${filteredProducts.length !== 1 ? "s" : ""}`}
             </p>
           </div>
 
@@ -158,7 +167,7 @@ const ShopContent = () => {
                   </div>
                 </div>
 
-                {/* Size — now functional */}
+                {/* Size */}
                 <div className="space-y-6">
                   <h3 className="text-sm uppercase tracking-widest font-bold">Size</h3>
                   <div className="flex flex-wrap gap-2">
@@ -194,7 +203,11 @@ const ShopContent = () => {
 
           {/* Product Grid */}
           <div className="flex-grow">
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+              <div className="py-24 text-center">
+                <p className="text-sm text-brand-charcoal/40 uppercase tracking-widest font-bold animate-pulse">Loading Collection...</p>
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-x-6 gap-y-12">
                 {filteredProducts.map(product => (
                   <ProductCard key={product.id} product={product} />

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowRight, Star, ShieldCheck, RefreshCw, Truck, CheckCircle } from "lucide-react";
-import { products, categories, testimonials } from "@/lib/data";
+import { Product, categories, testimonials } from "@/lib/data";
 import ProductCard from "@/components/ui/ProductCard";
 import Marquee from "@/components/ui/Marquee";
 import Tilt from "@/components/ui/Tilt";
@@ -14,8 +14,15 @@ import dynamic from "next/dynamic";
 const StickyNav = dynamic(() => import("@/components/ui/StickyNav"), { ssr: false });
 
 export default function Home() {
-  const bestsellers = products.filter((p) => p.isBestseller).slice(0, 4);
+  const [bestsellers, setBestsellers] = useState<Product[]>([]);
   const heroRef = useRef(null);
+
+  useEffect(() => {
+    fetch("/api/products?bestseller=true&limit=4")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setBestsellers(data); })
+      .catch(() => {});
+  }, []);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "submitting" | "done">("idle");
 

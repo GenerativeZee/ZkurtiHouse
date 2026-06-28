@@ -3,6 +3,8 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ClientWrapper from "@/components/layout/ClientWrapper";
+import Providers from "@/components/layout/Providers";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -19,8 +21,6 @@ export const metadata: Metadata = {
   description: "Label Noor: An immersive editorial ethnic wear experience. Handcrafted Aligarh kurtis with minimalist grace.",
 };
 
-import ClientWrapper from "@/components/layout/ClientWrapper";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,12 +29,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="min-h-screen flex flex-col bg-brand-ivory text-brand-charcoal overflow-x-hidden">
-        <ClientWrapper />
-        <Header />
-        <main className="flex-grow pt-20">
-          {children}
-        </main>
-        <Footer />
+        <Providers>
+          <ClientWrapper />
+          <Header />
+          <main className="flex-grow pt-20">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { ArrowRight, Star, ShieldCheck, RefreshCw, Truck } from "lucide-react";
+import { ArrowRight, Star, ShieldCheck, RefreshCw, Truck, CheckCircle } from "lucide-react";
 import { products, categories, testimonials } from "@/lib/data";
 import ProductCard from "@/components/ui/ProductCard";
 import Marquee from "@/components/ui/Marquee";
@@ -16,6 +16,16 @@ const StickyNav = dynamic(() => import("@/components/ui/StickyNav"), { ssr: fals
 export default function Home() {
   const bestsellers = products.filter((p) => p.isBestseller).slice(0, 4);
   const heroRef = useRef(null);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "submitting" | "done">("idle");
+
+  const handleNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim() || !/\S+@\S+\.\S+/.test(newsletterEmail)) return;
+    setNewsletterStatus("submitting");
+    await new Promise(r => setTimeout(r, 800));
+    setNewsletterStatus("done");
+  };
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"]
@@ -389,16 +399,33 @@ export default function Home() {
             <p className="text-xs text-white/50 tracking-[0.2em] leading-relaxed max-w-lg mx-auto">
               Subscribe for exclusive access to new collections, seasonal sales, and Aligarh craftsmanship stories.
             </p>
-            <form className="flex flex-col sm:flex-row gap-0 border-b border-white/20 pb-4 mt-12">
-              <input
-                type="email"
-                placeholder="YOUR EMAIL ADDRESS"
-                className="flex-grow bg-transparent px-2 py-4 text-[10px] uppercase tracking-[0.3em] focus:outline-none placeholder:text-white/20"
-              />
-              <button className="bg-transparent text-white px-8 py-4 text-[10px] uppercase tracking-[0.4em] font-bold hover:text-brand-gold transition-colors">
-                Subscribe
-              </button>
-            </form>
+            {newsletterStatus === "done" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-center gap-3 text-sm mt-12"
+              >
+                <CheckCircle size={20} className="text-brand-gold" />
+                <span className="uppercase tracking-widest text-[10px] font-bold">You&apos;re in the Inner Circle. Welcome!</span>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleNewsletter} className="flex flex-col sm:flex-row gap-0 border-b border-white/20 pb-4 mt-12">
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={e => setNewsletterEmail(e.target.value)}
+                  placeholder="YOUR EMAIL ADDRESS"
+                  className="flex-grow bg-transparent px-2 py-4 text-[10px] uppercase tracking-[0.3em] focus:outline-none placeholder:text-white/20"
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterStatus === "submitting"}
+                  className="bg-transparent text-white px-8 py-4 text-[10px] uppercase tracking-[0.4em] font-bold hover:text-brand-gold transition-colors disabled:opacity-50"
+                >
+                  {newsletterStatus === "submitting" ? "..." : "Subscribe"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>

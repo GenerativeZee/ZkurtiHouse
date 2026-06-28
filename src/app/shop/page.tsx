@@ -8,6 +8,8 @@ import { SlidersHorizontal, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+const ALL_SIZES = ["S", "M", "L", "XL", "XXL"];
+
 const ShopContent = () => {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
@@ -16,8 +18,15 @@ const ShopContent = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState(1500);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
   const categories = ["Daily Wear", "Office Wear", "Festive Wear"];
+
+  const toggleSize = (size: string) => {
+    setSelectedSizes(prev =>
+      prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+    );
+  };
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -28,16 +37,27 @@ const ShopContent = () => {
 
     result = result.filter(p => p.price <= priceRange);
 
+    if (selectedSizes.length > 0) {
+      result = result.filter(p => selectedSizes.some(s => p.sizes.includes(s)));
+    }
+
     if (sortBy === "price-low") result.sort((a, b) => a.price - b.price);
     if (sortBy === "price-high") result.sort((a, b) => b.price - a.price);
     if (sortBy === "newest") result.sort((a, b) => b.id.localeCompare(a.id));
 
     return result;
-  }, [selectedCategory, priceRange, sortBy]);
+  }, [selectedCategory, priceRange, selectedSizes, sortBy]);
+
+  const hasActiveFilters = selectedCategory || priceRange < 1500 || selectedSizes.length > 0;
+
+  const clearAll = () => {
+    setSelectedCategory(null);
+    setPriceRange(1500);
+    setSelectedSizes([]);
+  };
 
   return (
     <div className="bg-white min-h-screen pb-24">
-      {/* Page Header */}
       <div className="bg-brand-beige py-20">
         <div className="container-custom text-center space-y-4">
           <h1 className="text-5xl font-serif">Shop All</h1>
@@ -49,7 +69,7 @@ const ShopContent = () => {
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center py-6 border-b border-brand-charcoal/5 gap-6">
           <div className="flex items-center space-x-8">
-            <button 
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center space-x-2 text-xs uppercase tracking-widest font-bold"
             >
@@ -57,14 +77,14 @@ const ShopContent = () => {
               <span>{showFilters ? "Hide Filters" : "Show Filters"}</span>
             </button>
             <p className="text-xs text-brand-charcoal/40 uppercase tracking-widest">
-              Showing {filteredProducts.length} Products
+              Showing {filteredProducts.length} Product{filteredProducts.length !== 1 ? "s" : ""}
             </p>
           </div>
 
           <div className="flex items-center space-x-2">
             <span className="text-[10px] uppercase tracking-widest font-bold text-brand-charcoal/40">Sort By:</span>
             <div className="relative group">
-              <select 
+              <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="appearance-none bg-transparent text-xs uppercase tracking-widest font-bold pr-8 outline-none cursor-pointer"
@@ -87,13 +107,13 @@ const ShopContent = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="w-full lg:w-64 space-y-12"
+                className="w-full lg:w-64 space-y-12 shrink-0"
               >
-                {/* Category Filter */}
+                {/* Category */}
                 <div className="space-y-6">
                   <h3 className="text-sm uppercase tracking-widest font-bold">Category</h3>
                   <div className="space-y-3">
-                    <button 
+                    <button
                       onClick={() => setSelectedCategory(null)}
                       className={cn(
                         "block text-sm transition-colors",
@@ -103,7 +123,7 @@ const ShopContent = () => {
                       All Categories
                     </button>
                     {categories.map(cat => (
-                      <button 
+                      <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
                         className={cn(
@@ -117,16 +137,16 @@ const ShopContent = () => {
                   </div>
                 </div>
 
-                {/* Price Filter */}
+                {/* Price */}
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <h3 className="text-sm uppercase tracking-widest font-bold">Price Range</h3>
                     <span className="text-xs font-bold text-brand-gold">Up to ₹{priceRange}</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="500" 
-                    max="1500" 
+                  <input
+                    type="range"
+                    min="500"
+                    max="1500"
                     step="50"
                     value={priceRange}
                     onChange={(e) => setPriceRange(parseInt(e.target.value))}
@@ -138,25 +158,30 @@ const ShopContent = () => {
                   </div>
                 </div>
 
-                {/* Size Filter */}
+                {/* Size — now functional */}
                 <div className="space-y-6">
                   <h3 className="text-sm uppercase tracking-widest font-bold">Size</h3>
                   <div className="flex flex-wrap gap-2">
-                    {["S", "M", "L", "XL", "XXL"].map(size => (
-                      <button key={size} className="w-10 h-10 border border-brand-charcoal/10 text-xs font-medium hover:border-brand-gold hover:text-brand-gold transition-colors">
+                    {ALL_SIZES.map(size => (
+                      <button
+                        key={size}
+                        onClick={() => toggleSize(size)}
+                        className={cn(
+                          "w-10 h-10 border text-xs font-medium transition-all",
+                          selectedSizes.includes(size)
+                            ? "bg-brand-charcoal text-white border-brand-charcoal"
+                            : "border-brand-charcoal/10 hover:border-brand-gold hover:text-brand-gold"
+                        )}
+                      >
                         {size}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Clear All */}
-                {(selectedCategory || priceRange < 1500) && (
-                  <button 
-                    onClick={() => {
-                      setSelectedCategory(null);
-                      setPriceRange(1500);
-                    }}
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearAll}
                     className="flex items-center space-x-2 text-[10px] uppercase tracking-widest font-bold text-red-500"
                   >
                     <X size={14} />
@@ -178,16 +203,8 @@ const ShopContent = () => {
             ) : (
               <div className="py-24 text-center space-y-4">
                 <h3 className="text-2xl font-serif">No products found</h3>
-                <p className="text-sm text-brand-charcoal/60">Try adjusting your filters to find what you're looking for.</p>
-                <button 
-                  onClick={() => {
-                    setSelectedCategory(null);
-                    setPriceRange(1500);
-                  }}
-                  className="btn-outline mt-4"
-                >
-                  Reset Filters
-                </button>
+                <p className="text-sm text-brand-charcoal/60">Try adjusting your filters to find what you&apos;re looking for.</p>
+                <button onClick={clearAll} className="btn-outline mt-4">Reset Filters</button>
               </div>
             )}
           </div>

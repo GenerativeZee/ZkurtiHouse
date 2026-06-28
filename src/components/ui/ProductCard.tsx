@@ -6,12 +6,37 @@ import { motion } from "framer-motion";
 import { ShoppingBag, Heart } from "lucide-react";
 import { Product } from "@/lib/data";
 import Tilt from "@/components/ui/Tilt";
+import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { addToCart } = useCart();
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const [added, setAdded] = useState(false);
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const defaultSize = product.sizes[0];
+    const defaultColor = product.colors[0];
+    addToCart(product, defaultSize, defaultColor, 1);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
+  };
+
+  const wishlisted = isWishlisted(product.id);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -31,30 +56,38 @@ const ProductCard = ({ product }: ProductCardProps) => {
               style={{ transform: "translateZ(20px)" }}
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
-            
+
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
 
-            {/* Quick Actions Overlay */}
-            <div 
+            {/* Quick Add Overlay */}
+            <div
               className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-10"
               style={{ transform: "translateZ(40px)" }}
             >
-              <button className="w-full bg-white/90 backdrop-blur-md text-brand-charcoal py-4 text-[9px] uppercase tracking-[0.3em] font-bold flex items-center justify-center space-x-2 hover:bg-brand-charcoal hover:text-white transition-colors">
+              <button
+                onClick={handleQuickAdd}
+                className="w-full bg-white/90 backdrop-blur-md text-brand-charcoal py-4 text-[9px] uppercase tracking-[0.3em] font-bold flex items-center justify-center space-x-2 hover:bg-brand-charcoal hover:text-white transition-colors"
+              >
                 <ShoppingBag size={12} />
-                <span>Quick Add</span>
+                <span>{added ? "Added!" : `Quick Add (${product.sizes[0]})`}</span>
               </button>
             </div>
 
-            <button 
-              className="absolute top-4 right-4 text-brand-charcoal hover:text-brand-gold transition-colors z-10 p-2" 
-              aria-label="Add to Wishlist"
+            <button
+              onClick={handleWishlist}
+              className="absolute top-4 right-4 z-10 p-2 transition-colors"
+              aria-label="Toggle Wishlist"
               style={{ transform: "translateZ(30px)" }}
             >
-              <Heart size={16} strokeWidth={1.5} />
+              <Heart
+                size={16}
+                strokeWidth={1.5}
+                className={wishlisted ? "fill-brand-gold text-brand-gold" : "text-brand-charcoal hover:text-brand-gold"}
+              />
             </button>
           </div>
 
-          <div 
+          <div
             className="mt-6 space-y-2 text-center"
             style={{ transform: "translateZ(30px)" }}
           >

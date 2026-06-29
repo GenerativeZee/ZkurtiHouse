@@ -31,9 +31,23 @@ export default function ContactPage() {
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setSubmitting(false);
-    setSubmitted(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrors({ message: data.error || "Failed to send. Please try again." });
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setErrors({ message: "Failed to send. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass = (field: keyof typeof form) =>

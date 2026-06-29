@@ -20,7 +20,7 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/products?bestseller=true&limit=4")
       .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setBestsellers(data); })
+      .then(res => { const data = res?.data ?? res; if (Array.isArray(data)) setBestsellers(data); })
       .catch(() => {});
   }, []);
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -30,7 +30,13 @@ export default function Home() {
     e.preventDefault();
     if (!newsletterEmail.trim() || !/\S+@\S+\.\S+/.test(newsletterEmail)) return;
     setNewsletterStatus("submitting");
-    await new Promise(r => setTimeout(r, 800));
+    try {
+      await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+    } catch {}
     setNewsletterStatus("done");
   };
   const { scrollYProgress } = useScroll({

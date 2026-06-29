@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
-// In-memory rate limiter (per serverless instance — good enough for basic protection)
 const rateLimits = new Map<string, { count: number; resetAt: number }>();
 
 function rateLimit(ip: string, limit: number, windowMs: number): boolean {
@@ -18,28 +17,34 @@ function rateLimit(ip: string, limit: number, windowMs: number): boolean {
   return true;
 }
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
+const withClerk = clerkMiddleware(async (auth, req) => {
+  if (isAdminRoute(req)) {
+    await auth.protect();
+  }
+});
+
+export default function middleware(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const path = req.nextUrl.pathname;
 
-  // Tighter limit on payment and order endpoints
-  if (path.startsWith("/api/create-order") || path.startsWith("/api/verify-payment") || path.startsWith("/api/save-order")) {
-    if (!rateLimit(ip, 20, 60_000)) {
+  if (
+    path.startsWith("/api/create-order") ||
+    path.startsWith("/api/verify-payment") ||
+    path.startsWith("/api/save-order")
+  ) {
+    if (!rateLimit(`pay:${ip}`, 20, 60_000)) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
   }
 
-  // General API rate limit
   if (path.startsWith("/api/")) {
     if (!rateLimit(`api:${ip}`, 120, 60_000)) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
   }
 
-  if (isAdminRoute(req)) {
-    await auth.protect();
-  }
-});
+  return withClerk(req, {} as never);
+}
 
 export const config = {
   matcher: [

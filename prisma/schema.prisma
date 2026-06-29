@@ -34,25 +34,25 @@ model Product {
 }
 
 model Order {
-  id                  String      @id @default(cuid())
-  orderNumber         String      @unique
-  clerkUserId         String?
-  customerName        String
-  customerEmail       String
-  customerPhone       String
-  shippingAddress     Json
-  subtotal            Int
-  discount            Int         @default(0)
-  couponCode          String?
-  total               Int
-  paymentMethod       String
-  paymentStatus       String      @default("pending")
-  razorpayOrderId     String?
-  razorpayPaymentId   String?
-  status              String      @default("confirmed")
-  items               OrderItem[]
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique
+  clerkUserId       String?
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  shippingAddress   Json
+  subtotal          Int
+  discount          Int         @default(0)
+  couponCode        String?
+  total             Int
+  paymentMethod     String
+  paymentStatus     String      @default("pending")
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  status            String      @default("confirmed")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  items             OrderItem[]
 
   @@index([clerkUserId])
   @@index([paymentStatus])
@@ -62,9 +62,7 @@ model Order {
 
 model OrderItem {
   id        String  @id @default(cuid())
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   String
-  product   Product @relation(fields: [productId], references: [id])
   productId String
   name      String
   price     Int
@@ -72,6 +70,8 @@ model OrderItem {
   quantity  Int
   size      String
   color     String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
   @@index([productId])

@@ -20,7 +20,7 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/products?bestseller=true&limit=4")
       .then(r => r.json())
-      .then(res => { const data = res?.data ?? res; if (Array.isArray(data)) setBestsellers(data); })
+      .then(res => { const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []; setBestsellers(data); })
       .catch(() => {});
   }, []);
   const [newsletterEmail, setNewsletterEmail] = useState("");

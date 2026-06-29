@@ -50,8 +50,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       fetch("/api/products?limit=100").then(r => r.json()),
     ]).then(([p, allRes]) => {
       setProduct(p);
-      const all = allRes?.data ?? allRes;
-      if (p && Array.isArray(all)) {
+      const all = Array.isArray(allRes?.data) ? allRes.data : Array.isArray(allRes) ? allRes : [];
+      if (p && all.length > 0) {
         setRelatedProducts(
           all.filter((x: Product) => x.id !== p.id && x.category === p.category).slice(0, 4)
         );

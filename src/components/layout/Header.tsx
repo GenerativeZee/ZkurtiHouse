@@ -50,7 +50,7 @@ const Header = () => {
     const t = setTimeout(() => {
       fetch(`/api/products?search=${encodeURIComponent(searchQuery)}&limit=5`)
         .then(r => r.json())
-        .then(res => { const data = res?.data ?? res; if (Array.isArray(data)) setSearchResults(data); })
+        .then(res => { const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []; setSearchResults(data); })
         .catch(() => {});
     }, 300);
     return () => clearTimeout(t);

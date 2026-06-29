@@ -27,7 +27,11 @@ const ShopContent = () => {
   useEffect(() => {
     fetch("/api/products?limit=100")
       .then(r => r.json())
-      .then(data => { setProducts(data?.data ?? data); setLoading(false); })
+      .then(data => {
+        const arr = data?.data ?? data;
+        setProducts(Array.isArray(arr) ? arr : []);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
